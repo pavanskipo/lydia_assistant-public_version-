@@ -1,0 +1,24 @@
+{
+  "name": "lydia_assistant",
+  "version": "1.0.0",
+  "description": "A simple assistant",
+  "main": "lydia.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pavanskipo/lydia_assistant.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pavanskipo/lydia_assistant/issues"
+  },
+  "homepage": "https://github.com/pavanskipo/lydia_assistant#readme",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "readline-sync": "^1.4.9",
+    "shelljs": "^0.8.3"
+  }
+}
