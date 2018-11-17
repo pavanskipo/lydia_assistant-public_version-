@@ -11,7 +11,7 @@ const seperator_Text = "-----------";
 // System variables
 var g_servers = [];
 var g_serverNames = [];
-
+var g_appPath;
 
 // Validations
 
@@ -40,7 +40,7 @@ function setNewConfig(type) {
   }
 
   let serverPath = readline.question("Where is the \'" + serverName + "\' app located at?\n Press \"ENTER\" to use current directory ->");
-  if(serverPath.trim() === ''){
+  if (serverPath.trim() === '') {
     serverPath = shell.pwd().stdout
   }
   let serverExec = readline.question("How do i run this server?($IP = IP address, $PORT = port) \n Example: \"ng serve --host $IP --port $PORT\" \t\t->");
@@ -63,7 +63,7 @@ function setNewConfig(type) {
   });
 
   try {
-    fs.writeFileSync('config/paths.json', JSON.stringify(paths), 'utf-8');
+    fs.writeFileSync(g_appPath + '/config/paths.json', JSON.stringify(paths), 'utf-8');
     console.log('Paths have been updated!');
     updateFromPaths();
   } catch (err) {
@@ -85,13 +85,13 @@ function updateConfig(serverName) {
     let data = g_servers.servers[serverIndex];
     let serverName = readline.question("What to rename this server?( Current name - " + data.serverName + " ) ->");
     let serverNameError;
-    if(serverName.trim() === ''){
+    if (serverName.trim() === '') {
       serverNameError = '';
       serverName = data.serverName;
-    }else{
+    } else {
       serverName = serverName;
       serverNameError = validateServerName(serverName);
-    } 
+    }
     while (serverNameError !== '') {
       serverName = readline.question("Please provide another name ->");
       serverNameError = validateServerName(serverName);
@@ -110,7 +110,7 @@ function updateConfig(serverName) {
       'serverDefaultPort': serverDefaultPort
     };
     try {
-      fs.writeFileSync('config/paths.json', JSON.stringify(paths), 'utf-8');
+      fs.writeFileSync(g_appPath + '/config/paths.json', JSON.stringify(paths), 'utf-8');
       console.log('Configuration has been updated!');
       updateFromPaths();
     } catch (err) {
@@ -120,7 +120,7 @@ function updateConfig(serverName) {
   }
 }
 
-function readConfigurations(serverName){
+function readConfigurations(serverName) {
   let serverIndex = -1;
   let servers = [];
   for (let index in g_serverNames) {
@@ -130,26 +130,26 @@ function readConfigurations(serverName){
     }
   }
   console.log(seperator_Text);
-  if(g_servers.servers.length <= 0){
+  if (g_servers.length == 0 || g_servers.servers.length <= 0) {
     let confirmation = readline.question("We don't have any servers... Do you want to configure a new one?(y/n) ");
-      if (affirmative_text.indexOf(confirmation.toLowerCase()) > -1) {
-        setNewConfig('first');
-      } else {
-        console.log("Okay, If you change your mind...let me know \n");
-      }
-  } else if(serverIndex === -1){
+    if (affirmative_text.indexOf(confirmation.toLowerCase()) > -1) {
+      setNewConfig('first');
+    } else {
+      console.log("Okay, If you change your mind...let me know \n");
+    }
+  } else if (serverIndex === -1) {
     console.log("Our servers -> ( Name | Path | command)")
     g_servers['servers'].forEach(function (server) {
-      console.log(server.serverName+" | "+server.serverPath+" | "+server.serverExec);
+      console.log(server.serverName + " | " + server.serverPath + " | " + server.serverExec);
     });
   } else {
-    servers.forEach(function(serverIndex){
+    servers.forEach(function (serverIndex) {
       let server = g_servers.servers[serverIndex];
-      console.log("Server Name : "+server.serverName);
-      console.log("Server Path : "+server.serverPath);
-      console.log("Execution   : "+server.serverExec);
+      console.log("Server Name : " + server.serverName);
+      console.log("Server Path : " + server.serverPath);
+      console.log("Execution   : " + server.serverExec);
       console.log("\n");
-    });    
+    });
   }
 
   console.log("\n");
@@ -170,16 +170,16 @@ function deleteConfiguration(serverName) {
   } else {
     console.log(seperator_Text);
     let paths = g_servers;
-    servers.forEach(function(serverIndex){
+    servers.forEach(function (serverIndex) {
       paths.servers[serverIndex] = '-1';
     });
     removedIndx = paths.servers.indexOf('-1');
-    while(removedIndx > -1) {
-      paths.servers.splice(removedIndx,1);
+    while (removedIndx > -1) {
+      paths.servers.splice(removedIndx, 1);
       removedIndx = paths.servers.indexOf('-1');
     }
     try {
-      fs.writeFileSync('config/paths.json', JSON.stringify(paths), 'utf-8');
+      fs.writeFileSync(g_appPath + '/config/paths.json', JSON.stringify(paths), 'utf-8');
       console.log('Configuration has been deleted!');
       updateFromPaths();
     } catch (err) {
@@ -196,63 +196,88 @@ function deleteConfiguration(serverName) {
 function init() {
   try {
     shell = require('shelljs');
-    fs = require('fs');
+    fs = require('file-system');
     readline = require('readline-sync');
     begin();
   } catch (error) {
     console.log("oh no....! It seems some packages are missing =(");
+    console.log("Please reinstall");
     process.exit()
   }
 }
 
-function runTheServer(serverNameSet){
+function runTheServer(serverNameSet) {
   let serverIndex = -1;
   for (let index in g_serverNames) {
-    if (serverName.has(g_serverNames[index])) {
+    if (serverNameSet.has(g_serverNames[index])) {
       serverIndex = index;
     }
   }
   let serverName = [...serverNameSet];
-  let ports = (serverName.indexOf("port") > -1)? serverName.slice(serverName.indexOf("port"),serverName.length) : null;
-  if(ports === null){
-    
-  }
+  let portExist = (serverName.indexOf("port") > -1) ? serverName.slice(serverName.indexOf("port"), serverName.length) : null;
+  let ports = [];
 
-
-  if(g_servers.servers.length <= 0){
+  if (g_servers.servers.length <= 0) {
     let confirmation = readline.question("We don't have any servers... Do you want to configure a new one?(y/n) ");
-      if (affirmative_text.indexOf(confirmation.toLowerCase()) > -1) {
-        setNewConfig('first');
-      } else {
-        console.log("Okay, If you change your mind...let me know \n");
-      }
-  } else if(serverIndex === -1){
+    if (affirmative_text.indexOf(confirmation.toLowerCase()) > -1) {
+      setNewConfig('first');
+    } else {
+      console.log("Okay, If you change your mind...let me know \n");
+    }
+  } else if (serverIndex === -1) {
+    console.log("Didn't find a server with that name. ")
     console.log("Our servers -> ( Name | Path | command)")
     g_servers['servers'].forEach(function (server) {
-      console.log(server.serverName+" | "+server.serverPath+" | "+server.serverExec);
+      console.log(server.serverName + " | " + server.serverPath + " | " + server.serverExec);
     });
   } else {
-    servers.forEach(function(serverIndex){
-      let server = g_servers.servers[serverIndex];
-      console.log("Server Name : "+server.serverName);
-      console.log("Server Path : "+server.serverPath);
-      console.log("Execution   : "+server.serverExec);
-      console.log("\n");
-    });    
+    let server = g_servers.servers[serverIndex];
+    let execCommand = server.serverExec;
+    try {
+
+      execCommand = 'gnome-terminal --tab -e \"' + execCommand + '\"';
+      let ipAddr = shell.exec('hostname -I', {
+        silent: true
+      }).stdout.split(" ")[0];
+      execCommand = execCommand.replace(/\$IP/g, ipAddr);
+
+      if (portExist === null) {
+        server.serverDefaultPort = (server.serverDefaultPort == '') ? 8080 : server.serverDefaultPort;
+        execCommand = execCommand.replace(/\$PORT/g, server.serverDefaultPort);
+        execCommand = "cd " + server.serverPath + ";" + execCommand;
+
+        shell.exec(execCommand, {
+          silent: true
+        });
+        console.log("Running " + server.serverName);
+        // console.log(shell.pwd())
+      } else {
+        console.log(portExist);
+        portExist.forEach(function (port) {
+
+          if (Number.isInteger(parseInt(port))) {
+            let command = execCommand.replace(/\$PORT/g, port);
+            execCommand = "cd " + server.serverPath + ";" + execCommand;
+
+            shell.exec(command, {
+              silent: true
+            });
+            // console.log(shell.pwd())
+          }
+        });
+        console.log("Running " + server.serverName + " on " + ipAddr + " : " + port);
+      }
+    } catch (err) {
+      console.log("Couldn't run the server, try again...");
+    }
   }
-
-
-
-
-
-
 }
 
 function decipherCommand(command) {
   let c = command.split(" ");
-  if (c.indexOf("run") > -1) {
+  if (c.indexOf("run") > -1 || c.indexOf("runserver") > -1) {
     changedIndx = c.indexOf('ports');
-    while(changedIndx > -1) {
+    while (changedIndx > -1) {
       c[changedIndx] = 'port';
       changedIndx = c.indexOf('ports');
     }
@@ -272,12 +297,11 @@ function decipherCommand(command) {
     updateConfig(serverName);
     return 'update a config';
 
-  } else if (c.indexOf("delete") > -1 || c.indexOf("remove") > -1){
+  } else if (c.indexOf("delete") > -1 || c.indexOf("remove") > -1) {
     let serverName = new Set(c);
     deleteConfiguration(serverName);
     return 'delete a config';
-  }
-  else {
+  } else {
     console.log("Sorry, I didn't get that...");
     return 'nota';
   }
@@ -286,7 +310,7 @@ function decipherCommand(command) {
 function updateFromPaths() {
   return new Promise(function (resolve, reject) {
     try {
-      var data = fs.readFileSync('config/paths.json');
+      var data = fs.readFileSync(g_appPath + '/config/paths.json');
       g_serverNames = [];
       g_servers = JSON.parse(data);
       for (let server of g_servers.servers) {
@@ -295,8 +319,12 @@ function updateFromPaths() {
       resolve();
     } catch (err) {
       console.log(seperator_Text);
-      shell.exec('mkdir config', { silent: true });
-      shell.exec('touch config/paths.json', { silent: true });
+      shell.exec('mkdir ' + g_appPath + '/config', {
+        silent: true
+      });
+      shell.exec('touch ' + g_appPath + '/config/paths.json', {
+        silent: true
+      });
       console.log("No Servers found...")
       let confirmation = readline.question("Do you want to configure a new server?(y/n) ");
       if (affirmative_text.indexOf(confirmation.toLowerCase()) > -1) {
@@ -316,6 +344,15 @@ function updateFromPaths() {
 function begin() {
   let command;
   let command_result = 'begin';
+  g_appPath = shell.exec('whereIsLydia.sh', {
+    silent: true
+  }).stdout
+  if (g_appPath == '') {
+    console.log("Missing location...");
+    process.exit();
+  } else {
+    g_appPath = g_appPath.substring(0, g_appPath.length - 1);
+  }
   var update = updateFromPaths();
   update.then(function () {
     console.log(seperator_Text);
