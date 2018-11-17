@@ -13,7 +13,6 @@ var g_servers = [];
 var g_serverNames = [];
 
 
-
 // Validations
 
 function validateServerName(name) {
@@ -40,8 +39,12 @@ function setNewConfig(type) {
     serverNameError = validateServerName(serverName);
   }
 
-  let serverPath = readline.question("Where is the \'" + serverName + "\' app located at? ->");
+  let serverPath = readline.question("Where is the \'" + serverName + "\' app located at?\n Press \"ENTER\" to use current directory ->");
+  if(serverPath.trim() === ''){
+    serverPath = shell.pwd().stdout
+  }
   let serverExec = readline.question("How do i run this server?($IP = IP address, $PORT = port) \n Example: \"ng serve --host $IP --port $PORT\" \t\t->");
+  let serverDefaultPort = readline.question("Any default port number?( Defaults to 8080 ) ->");
   let paths;
 
   if (type === 'first') {
@@ -55,7 +58,8 @@ function setNewConfig(type) {
   paths.servers.push({
     'serverName': serverName.toLowerCase(),
     'serverPath': serverPath,
-    'serverExec': serverExec
+    'serverExec': serverExec,
+    'serverDefaultPort': serverDefaultPort
   });
 
   try {
@@ -97,12 +101,13 @@ function updateConfig(serverName) {
     serverPath = (serverPath.trim() === '') ? data.serverPath : serverPath;
     let serverExec = readline.question("How do i run this server?($IP = IP address, $PORT = port) \n ( Currently -" + data.serverExec + ") ->");
     serverExec = (serverExec.trim() === '') ? data.serverExec : serverExec;
-
+    let serverDefaultPort = readline.question("Change default port number?")
     let paths = g_servers;
     paths.servers[serverIndex] = {
       'serverName': serverName.toLowerCase(),
       'serverPath': serverPath,
-      'serverExec': serverExec
+      'serverExec': serverExec,
+      'serverDefaultPort': serverDefaultPort
     };
     try {
       fs.writeFileSync('config/paths.json', JSON.stringify(paths), 'utf-8');
@@ -200,13 +205,57 @@ function init() {
   }
 }
 
-function runTheServer(serverName){
+function runTheServer(serverNameSet){
+  let serverIndex = -1;
+  for (let index in g_serverNames) {
+    if (serverName.has(g_serverNames[index])) {
+      serverIndex = index;
+    }
+  }
+  let serverName = [...serverNameSet];
+  let ports = (serverName.indexOf("port") > -1)? serverName.slice(serverName.indexOf("port"),serverName.length) : null;
+  if(ports === null){
+    
+  }
+
+
+  if(g_servers.servers.length <= 0){
+    let confirmation = readline.question("We don't have any servers... Do you want to configure a new one?(y/n) ");
+      if (affirmative_text.indexOf(confirmation.toLowerCase()) > -1) {
+        setNewConfig('first');
+      } else {
+        console.log("Okay, If you change your mind...let me know \n");
+      }
+  } else if(serverIndex === -1){
+    console.log("Our servers -> ( Name | Path | command)")
+    g_servers['servers'].forEach(function (server) {
+      console.log(server.serverName+" | "+server.serverPath+" | "+server.serverExec);
+    });
+  } else {
+    servers.forEach(function(serverIndex){
+      let server = g_servers.servers[serverIndex];
+      console.log("Server Name : "+server.serverName);
+      console.log("Server Path : "+server.serverPath);
+      console.log("Execution   : "+server.serverExec);
+      console.log("\n");
+    });    
+  }
+
+
+
+
+
 
 }
 
 function decipherCommand(command) {
   let c = command.split(" ");
   if (c.indexOf("run") > -1) {
+    changedIndx = c.indexOf('ports');
+    while(changedIndx > -1) {
+      c[changedIndx] = 'port';
+      changedIndx = c.indexOf('ports');
+    }
     let serverName = new Set(c);
     runTheServer(serverName);
     return 'run existing server';

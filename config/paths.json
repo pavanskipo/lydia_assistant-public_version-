@@ -1,1 +1,1 @@
-{"servers":[{"serverName":"yo","serverPath":"yo","serverExec":"yo"},{"serverName":"hi","serverPath":"hi","serverExec":"hi"},{"serverName":"yolo","serverPath":"yolo","serverExec":"o"}]}
+{"servers":[{"serverName":"yo","serverPath":"yo","serverExec":"yo","serverDefaultPort":"yo"},{"serverName":"ho","serverPath":"/home/skipo/Desktop/projects/funProjects/Lydia/lydia_assistant","serverExec":"h","serverDefaultPort":"ho"}]}
