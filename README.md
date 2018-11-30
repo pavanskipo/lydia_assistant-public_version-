@@ -6,9 +6,9 @@ A Housecarl for your Laptop/Desktop that can run and manage several development 
 
 In order to start Lydia just clone the repository and run ./initializeLydia.sh
 
-You can call Lydia from anywhere by using the command lydia
+You can call Lydia from anywhere by using the command `lydia`
 
-Alternatively you can also run command directly without going into lydia's interface by giving lydia '<Your command here>'
+Alternatively you can also run command directly without going into lydia's interface by giving ```lydia <Your command here>```
 
 ## Requirements
 
@@ -27,4 +27,4 @@ See also the list of [contributors](https://github.com/pavanskipo/lydia_assistan
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/pavanskipo/lydia_assistant/blob/master/LICENSE) file for details
