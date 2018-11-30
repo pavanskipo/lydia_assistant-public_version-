@@ -8,7 +8,7 @@ const affirmative_text = ['y', 'yes', 'yup'];
 const exit_text = ['exit', 'quit', 'close', 'bye'];
 const keywords_Text = ['run','runserver','port','ports','new',
 'create','server','add','list','show','detail','modify',
-'change','update','delete','remove','help'];
+'change','update','delete','remove','help','bye'];
 const seperator_Text = "-----------";
 
 // System variables
@@ -340,7 +340,12 @@ function decipherCommand(command) {
   } else if(c.indexOf("help") > -1) {
     showHelp();
     return 'help';
-  } else {
+  } else if (c.indexOf("bye") > -1){
+    console.log("\nBye");
+    console.log(seperator_Text);
+    process.exit();
+  }
+    else {
     console.log("Sorry, I didn't get that...");
     return 'nota';
   }
@@ -381,7 +386,7 @@ function updateFromPaths() {
 }
 
 function begin() {
-  let command;
+  let command = '';
   let command_result = 'begin';
   g_appPath = shell.exec('whereIsLydia.sh', {
     silent: true
@@ -394,12 +399,25 @@ function begin() {
   }
   var update = updateFromPaths();
   update.then(function () {
-    console.log(seperator_Text);
-    console.log("What can i do for you? ");
-    do {
-      command = readline.question("\n>>> Lydia, ");
+    let commandLine = process.argv.slice(2)
+    if(commandLine.length === 0){
+      console.log(seperator_Text);
+      console.log("What can i do for you? ");
+      do {
+        command = readline.question("\n>>> Lydia, ");
+        command_result = decipherCommand(command.toLowerCase());
+      } while (command_result != 'quit');
+    } else {
+      console.log(seperator_Text);
+      commandLine.forEach(function(data){
+        command = command + ' ' + data;
+      });
       command_result = decipherCommand(command.toLowerCase());
-    } while (command_result != 'quit');
+      do {
+        command = readline.question("\n>>> Lydia, ");
+        command_result = decipherCommand(command.toLowerCase());
+      } while (command_result != 'quit');
+    }    
   });
 
 }
